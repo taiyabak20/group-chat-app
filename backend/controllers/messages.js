@@ -1,5 +1,6 @@
 const messages = require('../models/messages');
 const users = require('../models/users');
+const {Op}= require('sequelize')
 exports.addMessage = (req, res)=>{
     try
     {
@@ -14,7 +15,13 @@ catch(err){
 
 exports.getMessages =async (req,res)=>{
     try{
-        const data = await messages.findAll({ attributes : ['message'],
+        const id = req.params.id;
+        console.log(id)
+        const data = await messages.findAll({where:{
+            id: {
+                [Op.gt]:id,
+            }
+        }, attributes : ['message'],
     include: [
         {
             model: users,
