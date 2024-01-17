@@ -14,8 +14,7 @@ async function loginUser(e){
             //console.log(res)
             localStorage.setItem('authToken', res.data)
             console.log('login Sucessful')
-            e.target.email.value = ""
-            e.target.password.value = ""
+            window.location = '../chatApp/index.html'
         }
     }
    catch(err){

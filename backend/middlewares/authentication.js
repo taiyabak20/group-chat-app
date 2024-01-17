@@ -4,12 +4,12 @@ require('dotenv').config()
 
 const auth = async(req, res, next)=>{
     try{
-        const token = req.header.auth;
+        const token = req.headers.auth;
         if(!token){
             return res.status(401);
         }
         const verified = await jwt.verify(token, process.env.TOKEN_SECRET)
-        const user = await users.findByPk(verified.userId)
+        const user = await users.findByPk(verified.id)
         req.user = user;
         next()
     }

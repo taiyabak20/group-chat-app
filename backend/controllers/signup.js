@@ -1,7 +1,9 @@
 const user = require('../models/users')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { Op } = require('sequelize');
 require('dotenv').config()
+
 
 exports.createUser = async(req, res)=>{
     const {name, email, pnumber, password} = req.body;
@@ -50,4 +52,25 @@ exports.loginUser = async(req, res)=>{
     else{
         return res.status(404).json('user not found')
     }
+}
+
+exports.getAll = async(req, res)=>{
+
+    try {
+        //console.log(req.user)
+    const users =await user.findAll({where :{
+        id: {
+            [Op.ne]: req.user.id
+        }
+    },
+        attributes : ['name']})
+        //console.log(users)
+        if(users){
+         
+            res.json(users)
+        }
+}
+catch(err){
+    console.log(err)
+}
 }
