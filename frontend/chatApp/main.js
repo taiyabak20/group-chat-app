@@ -10,25 +10,35 @@ async function rendering(){
         if(!token){
             window.location = '../login/login.html'
         }
-        const res = await axios.get(`${url}/getAllUsers`, {
-            headers: {
-                auth : token
-            }
-        })
-        const messages= await axios.get(`${msgUrl}/getMessages`, {
-            headers : {
-                auth: token
-            }
-        })
-        console.log(messages.data)
-        showOutput(res)
-        showMessages(messages)
+       fetchData(token)
+
+       setInterval(async () => {
+        await fetchData(token);
+    }, 1000); 
     }
     catch(err){
         console.log(err)
     }
 }
 
+async function fetchData(token){
+    document.querySelector('.messages').textContent = ""
+    document.querySelector('.joinedUsers').textContent = ""
+
+    const res = await axios.get(`${url}/getAllUsers`, {
+        headers: {
+            auth : token
+        }
+    })
+    const messages= await axios.get(`${msgUrl}/getMessages`, {
+        headers : {
+            auth: token
+        }
+    })
+    //console.log(res.data, messages.data)
+    showOutput(res)
+    showMessages(messages)
+}
 function showOutput(res){
     
     res.data.forEach(entry =>{
@@ -67,7 +77,7 @@ function logout(){
 function showMessages(res){
     res.data.forEach(entry =>{
         const p = document.createElement('p')
-        p.textContent = `${entry.message}`
+        p.textContent = `${entry.user.name}: ${entry.message}`
         document.querySelector('.messages').appendChild(p)
     })
 }

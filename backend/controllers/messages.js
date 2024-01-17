@@ -1,4 +1,5 @@
 const messages = require('../models/messages');
+const users = require('../models/users');
 exports.addMessage = (req, res)=>{
     try
     {
@@ -13,8 +14,14 @@ catch(err){
 
 exports.getMessages =async (req,res)=>{
     try{
-        const data = await messages.findAll({ attributes : ['message']})
-        console.log(data)
+        const data = await messages.findAll({ attributes : ['message'],
+    include: [
+        {
+            model: users,
+            attributes: ['name'],
+        }
+    ]})
+        //console.log(data)
         return res.json(data)
     }
     catch(err){
