@@ -3,10 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 exports.createUser = async(req, res)=>{
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
-    const pnumber = req.body.pnumber;
+    const {name, email, pnumber, password} = req.body.data;
     try{
         const userExist = await user.findOne({
             where : {email: email}
@@ -21,7 +18,7 @@ exports.createUser = async(req, res)=>{
                 await user.create({
                     name: name,
                     email: email,
-                    pnumber: pnumber,
+                    phoneNumber: pnumber,
                     password: hash
                 })
                 console.log(user)

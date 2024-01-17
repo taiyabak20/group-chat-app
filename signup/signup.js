@@ -10,7 +10,24 @@ async function createUser(e){
         pnumber: e.target.pnumber.value,
         password: e.target.password.value,
     }
-    console.log(data)
-    const res = axios.post(`${url}/addUser`, data)
+    // console.log(data)
+    try
+    {
+        const res =await axios.post(`${url}/addUser`, {data})
+        if(res.status == 201){
+            document.querySelector('.signup').textContent = 'Successfuly signed up'
+            e.target.name.value = ""
+            e.target.email.value = ""
+            e.target.pnumber.value = ""
+            e.target.password.value = ""
+        }
+    }
+   catch(err){
+    console.log(err)
+    if (err.response && err.response.status === 400) {
+        document.querySelector('.signup').textContent = 'User already exists, Please Login!';
+    }
+   }
+    
 
 }
