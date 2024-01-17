@@ -15,7 +15,14 @@ async function rendering(){
                 auth : token
             }
         })
+        const messages= await axios.get(`${msgUrl}/getMessages`, {
+            headers : {
+                auth: token
+            }
+        })
+        console.log(messages.data)
         showOutput(res)
+        showMessages(messages)
     }
     catch(err){
         console.log(err)
@@ -25,9 +32,9 @@ async function rendering(){
 function showOutput(res){
     
     res.data.forEach(entry =>{
-        const div = document.createElement('div')
-        div.textContent = `${entry.name} Joined`
-        document.querySelector('.joinedUsers').appendChild(div)
+        const p = document.createElement('p')
+        p.textContent = `${entry.name} Joined`
+        document.querySelector('.joinedUsers').appendChild(p)
 
     })
 }
@@ -55,4 +62,12 @@ function logout(){
     localStorage.removeItem('authToken')
     window.location.href = '../login/login.html';
 
+}
+
+function showMessages(res){
+    res.data.forEach(entry =>{
+        const p = document.createElement('p')
+        p.textContent = `${entry.message}`
+        document.querySelector('.messages').appendChild(p)
+    })
 }
