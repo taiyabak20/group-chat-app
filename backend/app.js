@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser');
 const sequelize = require('./utils/db')
-const signupRoutes = require('./routes/signup')
+const userRoutes = require('./routes/users')
 const cors = require('cors')
 app.use(cors({
     origin: 'http://127.0.0.1:5500',
@@ -12,7 +12,7 @@ app.use(cors({
 }))
 app.use(bodyParser.json());
 
-app.use('/signup', signupRoutes)
+app.use('/user', userRoutes)
 sequelize
 .sync()
 //.sync({force: true})

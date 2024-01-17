@@ -1,4 +1,4 @@
-const url = `http://localhost:3000/signup`
+const url = `http://localhost:3000/user`
 const signup = document.querySelector('#Signup')
 signup.addEventListener('submit', createUser)
 
@@ -13,7 +13,7 @@ async function createUser(e){
     // console.log(data)
     try
     {
-        const res =await axios.post(`${url}/addUser`, {data})
+        const res =await axios.post(`${url}/addUser`, data)
         if(res.status == 201){
             document.querySelector('.signup').textContent = 'Successfuly signed up'
             e.target.name.value = ""
