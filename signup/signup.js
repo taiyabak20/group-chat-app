@@ -11,6 +11,6 @@ async function createUser(e){
         password: e.target.password.value,
     }
     console.log(data)
-    //const res = axios.post(url, data)
+    const res = axios.post(`${url}/addUser`, data)
 
 }
