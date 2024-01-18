@@ -5,31 +5,33 @@ window.addEventListener('DOMContentLoaded', rendering)
 document.querySelector('#messageForm').addEventListener('submit', sendMessage)
 document.querySelector('.logoutBtn').addEventListener('click', logout)
 const token = localStorage.getItem('authToken')
-
 let messagesArray = [];
 async function rendering(){
     try{
         if(!token){
             window.location = '../login/login.html'
         }
-       
-       fetchData(token)
+    fetchData(token)
+       setInterval(async () => {
+        await fetchData(token);
 
-    //    setInterval(async () => {
-    //     await fetchData(token);
-    // }, 1000); 
-
+    }, 1000); 
     }
     catch(err){
         console.log(err)
     }
 }
 
+
+let  id;
 async function fetchData(token){
     document.querySelector('.messages').textContent = ""
     document.querySelector('.joinedUsers').textContent = ""
-    let id;
-    console.log(id)
+    messagesArray = JSON.parse(localStorage.getItem('messages'))
+   
+    if(messagesArray){
+    id = messagesArray.length
+    }
     const res = await axios.get(`${url}/getAllUsers`, {
         headers: {
             auth : token
@@ -40,20 +42,10 @@ async function fetchData(token){
             auth: token
         }
     })
-    messages.data.forEach(entry =>{
-        messagesArray.push(`${entry.user.name}: ${entry.message}`)
-        
-    })
-    id = messagesArray.length
-    console.log(messages)
-    const localMessages = localStorage.getItem('messages')
     showOutput(res)
-    setLocal(messages)
-    showMessages(localMessages)
-    localStorage.setItem("messages", messagesArray)
-    console.log(messagesArray)
-
-    
+    messagesArray = [...messagesArray, ...messages.data]
+    localStorage.setItem("messages", JSON.stringify(messagesArray))
+    showMessages(messagesArray)
 }
 function showOutput(res){
     
@@ -89,21 +81,14 @@ function logout(){
     window.location.href = '../login/login.html';
 
 }
-function setLocal(res){
-    
-}
+
 function showMessages(res){
     
-    res = res.split(',');
     res.forEach(entry =>
         {
             const p = document.createElement('p')
-            p.textContent = entry;
+            p.textContent = `${entry.user.name}: ${entry.message}`;
             document.querySelector('.messages').appendChild(p)
-
-       // console.log(entry)
         }
         )
 }
-
-
