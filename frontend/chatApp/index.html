@@ -24,6 +24,17 @@
             <input type="submit" value="send">
         </form>
     </div>
+    <div class="group">
+        <button class="groupBtn">Create Group</button>
+        <form id="groupForm">
+            <label for="name">name</label>
+            <input id="name" type="text">
+            <button class="selectBtn">Select Members</button>
+            <div class="users"></div>
+            <input type="submit">
+        </form>
+    </div>
+    <div class="availableGrps"></div>
     <button class="logoutBtn">Logout</button>
 </body>
 <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>

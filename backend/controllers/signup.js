@@ -63,7 +63,7 @@ exports.getAll = async(req, res)=>{
             [Op.ne]: req.user.id
         }
     },
-        attributes : ['name']})
+        attributes : ['name', 'id']})
         //console.log(users)
         if(users){
          
