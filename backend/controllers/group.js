@@ -21,12 +21,27 @@ exports.createGroup = async(req, res)=>{
 
 exports.getGroups =async (req, res)=>{
     const id = req.user.id;
-    const result = await members.findAll({where: {
-        userId: id
-    },
-    include: [{
-        model: group,
-        attributes: ['name'], 
-      }],})
+    const result = await members.findAll({
+        where: {
+          userId: id,
+        },
+        include: [
+          {
+            model: group,
+            attributes: ['name'],
+            include: [
+              {
+                model: members,
+                attributes: ['userId'], 
+              },
+            ],
+          },
+        ],
+      });
     return res.json(result)
+}
+
+exports.getAllGroups = async(req, res)=>{
+  const result = await group.findAll();
+  return res.json(result)
 }

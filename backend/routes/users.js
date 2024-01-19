@@ -4,5 +4,7 @@ const userController = require('../controllers/signup')
 const auth = require('../middlewares/authentication')
 router.post('/addUser', userController.createUser)
 router.post('/loginUser', userController.loginUser)
+router.get('/getAllUsers/:groupId',auth, userController.groupMembers)
 router.get('/getAllUsers',auth, userController.getAll)
+
 module.exports = router;

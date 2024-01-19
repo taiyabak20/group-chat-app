@@ -2,6 +2,8 @@ const user = require('../models/users')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize');
+const members = require('../models/members');
+const group = require('../models/group');
 require('dotenv').config()
 
 
@@ -54,23 +56,44 @@ exports.loginUser = async(req, res)=>{
     }
 }
 
-exports.getAll = async(req, res)=>{
-
+exports.groupMembers= async(req, res)=>{
+    const groupId = req.params.groupId
+console.log(groupId)
     try {
+        const you = req.user.id
         //console.log(req.user)
-    const users =await user.findAll({where :{
-        id: {
-            [Op.ne]: req.user.id
-        }
-    },
-        attributes : ['name', 'id']})
-        //console.log(users)
+        const users = await user.findAll({
+           
+            attributes: ['name', 'id'],
+            include: [
+              {
+                model: members,
+                where: { groupId: groupId },
+                attributes: ['admin', 'creator'], 
+                include: [
+                  {
+                    model: group,
+                    attributes: ['id', 'name'], 
+                  },
+                ],
+              },
+            ],
+          });
+          
+        
         if(users){
-         
-            res.json(users)
+            res.json({users , you})
         }
 }
 catch(err){
     console.log(err)
 }
+}
+
+exports.getAll =async (req, res)=>{
+    const result = await user.findAll( {where: {
+        id: {
+          [Op.ne]: req.user.id,
+        }}})
+    return res.json(result)
 }

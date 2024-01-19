@@ -1,12 +1,22 @@
 const messages = require('../models/messages');
 const users = require('../models/users');
+const Group = require('../models/group')
 const {Op}= require('sequelize')
-exports.addMessage = (req, res)=>{
+exports.addMessage =async (req, res)=>{
     try
     {
-    const message = req.body.message;
-    const result = req.user.createMessage({message: message})
-    return res.json({sucess: true, message : result})
+    const groupId = req.params.groupId
+    const messageText = req.body.message;
+    console.log(messageText)
+    const group = await Group.findByPk(groupId);
+
+    if (!group) {
+        return res.status(404).json({ success: false, error: 'Group not found' });
+    }
+
+    const message = await group.createMessage({ message: messageText, userId: req.user.id });
+
+    return res.json({ success: true, message });
 }
 catch(err){
     console.log(err)
@@ -16,11 +26,13 @@ catch(err){
 exports.getMessages =async (req,res)=>{
     try{
         const id = req.params.id;
-        console.log(id)
+        const groupId = req.body.groupId;
+        //console.log(groupId)
         const data = await messages.findAll({where:{
             id: {
                 [Op.gt]:id,
-            }
+            },
+             groupId: groupId,
         }, attributes : ['message'],
     include: [
         {

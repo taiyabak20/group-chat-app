@@ -1,0 +1,120 @@
+  
+  #chat {
+    font-size: 20px;
+    margin: 20px 0px 20px 3px;
+    height: 600px;
+    padding: 10px 1px 1px 1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .grpName {
+    width: 15%;
+    color: white;
+    font-size: 12px;
+  }
+  
+  .grpMember{
+font-size: 12px;
+/* width: 500px; */
+margin: 0px auto;
+color: black;
+background-color: white;
+padding: 2px;
+  }
+.row{
+  align-items: baseline;
+}
+  .grpMembers{
+      
+    margin: 2px 3rem;      
+    padding: 10px;  
+  }
+  
+  .members-container{
+    display: flex;
+    border: 1px solid black;
+  }
+  button {
+    color: white;
+    background-color: black;
+    padding: 10px;
+    display: block;
+    font-size: 18px;
+    border: none;
+    margin: 1rem auto;
+    width: 150px; 
+  }
+  
+
+body {  
+  margin: 20px;
+    font-family: Helvetica, sans-serif;
+  }
+#groupAvailable, #chat, #CreateGrp{
+ padding: 2px;
+ font-size: 20px;
+ margin: 40px 40px 40px 3px;
+ height: 500px; 
+ overflow-y: auto; 
+ box-shadow: 0 15px 15px -5px rgba(0, 0, 0, 0.2);
+}
+
+  .sendMessage {
+    position: sticky;
+    bottom: 0;   
+  }
+
+ 
+.youJoined , .joinedUser{
+    border-radius: 15px;
+    color: white;
+    background-color: black;
+    margin: 5px auto;
+    font-weight: 400;
+    font-size: 12px;
+    width: 200px;
+    padding: 2px;
+   
+}
+
+.user-container {
+    display: flex;
+    align-items: end;
+    margin-bottom: 10px;
+    font-size: 15px;
+
+}
+
+.user-container p {
+    margin-right: 15px;
+  
+}
+
+.messages{
+    display: flex;
+    flex-direction: column;
+   align-items: flex-start;
+   font-size: 15px;
+   padding: 10px;
+   
+
+}
+#name{
+    width: 150px;
+    font-size: 15px;
+    padding: 5px;
+} 
+
+.selectBtn{
+    font-size: 15px;
+}
+.submitGrp{
+    background-color: black;
+    border: none;
+    color: white;
+    font-size: 15px;
+    padding: 8px 20px;
+}
