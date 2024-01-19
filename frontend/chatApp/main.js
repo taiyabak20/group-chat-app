@@ -7,6 +7,8 @@ window.addEventListener('DOMContentLoaded', rendering)
 document.querySelector('#messageForm').addEventListener('submit', sendMessage)
 document.querySelector('.logoutBtn').addEventListener('click', logout)
 document.querySelector('.grpName').addEventListener('click', showGrpMembers)
+document.querySelector('.groupBtn').addEventListener('click', openForm)
+
 const token = localStorage.getItem('authToken')
 
 async function rendering(){
@@ -15,10 +17,10 @@ async function rendering(){
             window.location = '../login/login.html'
         }
      fetchData()
-    //    setInterval(async () => {
-    //     await fetchData(token);
+       setInterval(async () => {
+        await fetchData(token);
 
-    // }, 1000); 
+    }, 1000); 
     fetchGrps()
     }
     catch(err){
@@ -32,91 +34,20 @@ async function fetchData(name){
     document.querySelector('.joinedUsers').textContent = ""
     
    const groupId = localStorage.getItem('groupId')
-   console.log(groupId)
+   //console.log(groupId)
     const res = await axios.get(`${url}/getAllUsers/${groupId}`, {
         headers: {
             auth : token
         }
     })
-    showOutput(res)
+   
     const messages= await axios.post(`${msgUrl}/getMessages/${id}`,{groupId}, {
         headers : {
             auth: token
         }
     })
-    
-    console.log(res.data)
-    document.querySelector('.grpName').textContent = localStorage.getItem('groupName')
-    document.querySelector('.grpMembers').innerHTML = `Group Members:`
-    const you = res.data.you;
-    let isAdmin = false;
-
-res.data.users.forEach(member => {
-    member.members.forEach(admin => {
-        if (admin.admin && member.id === you) {
-            isAdmin = true;
-        }
-    });})
-    //console.log(you)
-    res.data.users.forEach(member =>{
-       // console.log(member)
-       
-        member.members.forEach(admin =>{
-           // console.log(admin)
-            if(admin.admin){
-                const span = document.createElement('div')  
-                span.textContent =  `${member.name} `
-                
-                span.classList.add('grpMember')
-                document.querySelector('.groupAdmins').appendChild(span)
-            }
-        })
-        const adminPowers = document.createElement('button')  
-        adminPowers.textContent =  `${member.name} `
-        adminPowers.classList.add(`${member.id}`)
-        adminPowers.classList.add('grpMember')
-        
-
-        document.querySelector('.grpMembers').appendChild(adminPowers)
-
-        adminPowers.addEventListener('click', async (e) => {
-            try {
-                const id = adminPowers.getAttribute('class')[0]
-
-               console.log(id)
-                if (isAdmin) {
-                    const result = await Swal.fire({
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Create Admin',
-                        cancelButtonText: 'Remove',
-                    });
-        
-                    if (result.isConfirmed) {
-                      const groupId = localStorage.getItem('groupId')
-                      console.log(groupId)
-                        const res = await axios.post(`${membersUrl}/makeAdmin`, {id, groupId}, {
-                            headers: {
-                                auth: token
-                            }
-                        });
-                       alert(res.data.message)
-                       
-
-                    } else {
-                       
-                    }
-                }
-            } catch (error) {
-                console.error('An error occurred:', error);
-            }
-        });
-        
-
-
-    })
-    
-  
+    showOutput(res)
+    adminPowers(res)
     showMessages(messages.data)
 }
 function showOutput(res){
@@ -128,6 +59,7 @@ function showOutput(res){
         document.querySelector('.joinedUsers').appendChild(p)
 
     })
+    
 }
 
 async function sendMessage(e){
@@ -151,13 +83,6 @@ try{
     
 }
 
-function logout(){
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('groupId')
-    window.location.href = '../login/login.html';
-
-}
-
 function showMessages(res){
     
     res.forEach(entry =>
@@ -168,18 +93,36 @@ function showMessages(res){
         }
         )
 }
-document.querySelector('.selectBtn').addEventListener('click', getMembers)
-document.querySelector('#groupForm').addEventListener('submit', createGroup)
-document.querySelector('.groupBtn').addEventListener('click', openForm)
+
+
+
+// -----------------------Group Section----------------------------
+
+document.querySelector('.selectBtn').addEventListener('click', (e) => {
+    getMembers(e);
+});
+
+document.querySelector('.submitGrp').addEventListener('click', (e) => {
+    createGroup(e);
+});
+
+document.querySelector('.joinGrpBtn').addEventListener('click', (e) => {
+    joinGrp(e);
+});
+
 let membersToBeAdded = []
 async function getMembers(e){
-    e.preventDefault()
+   e.preventDefault()
     const users = await axios.get(`${url}/getAllUsers`, {
         headers:{
             auth: token
         }
     })
-    
+
+    const toShow = document.querySelector('.users');
+    selection(users, toShow)
+}
+function selection(users, toShow){
     users.data.forEach(entry => {
         const userContainer = document.createElement('div');
         const user = document.createElement('p');
@@ -201,22 +144,23 @@ async function getMembers(e){
                 user.style.margin = '0px auto'
 
 
-
-        document.querySelector('.users').appendChild(userContainer);
+        toShow.appendChild(userContainer);
     
         addBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const value = addBtn.getAttribute('class');
             membersToBeAdded.push(value);
+            addBtn.style.backgroundColor = "green"
         });
-    });
     
-    console.log(users.data)
+    });
 }
+    
+
 async function createGroup(e){
     e.preventDefault()
    const data = {
-    name: e.target.name.value,
+    name: document.querySelector('#name').value,
     member: membersToBeAdded
    }
 
@@ -232,14 +176,7 @@ async function createGroup(e){
    availableGrps.appendChild(groupDiv)
 }
 
-function openForm(){
-    document.querySelector('#groupForm').style.display = 'block'
-}
-function showGrpMembers(){
-    document.querySelector('.grpMembers').style.display = 'block';
-    document.querySelector('.groupAdmins').style.display = 'block';
-    
-}
+
 async function fetchGrps(){
     const groups = await axios.get(`${groupUrl}/getAllGroups`, {
         headers: {
@@ -265,10 +202,10 @@ async function fetchGrps(){
     })
 }
 
-document.querySelector('.joinGrpBtn').addEventListener('click', joinGrp)
 
 async function joinGrp(e){
     e.preventDefault();
+    document.querySelector('.groups').textContent = ""
     const res = await axios.get(`${groupUrl}/getAll`, {
         headers:{
             auth: token
@@ -298,13 +235,170 @@ async function joinGrp(e){
 
 
     
-                joinBtn.addEventListener('click', (e) => {
+                joinBtn.addEventListener('click',async (e) => {
             e.preventDefault();
             const value = joinBtn.getAttribute('class');
             console.log(value)
+            const res = await axios.post(`${membersUrl}/joinGrp`,{value},{
+                headers:{
+                    auth: token
+                }
+            })
+            console.log(res)
+           alert(res.data)
         });
 
         document.querySelector('.groups').appendChild(userContainer)
     })
     
 }
+
+
+
+//----------------------------other--------------------------------
+
+
+function openForm(){
+    document.querySelector('#groupForm').style.display = 'block'
+}
+function showGrpMembers(){
+    let grpMembers = document.querySelector('.grpMembers')
+    let addUser = document.querySelector('.addUser')
+    let groupAdmins = document.querySelector('.groupAdmins')
+    if(grpMembers.style.display === 'none'){
+         grpMembers.style.display = 'block';
+         groupAdmins.style.display = 'block'; 
+         addUser.style.display = 'block'; 
+    }
+    else{
+        grpMembers.style.display = 'none';
+         groupAdmins.style.display = 'none'; 
+         addUser.style.display = 'none'; 
+    }
+    
+}
+function logout(){
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('groupId')
+    window.location.href = '../login/login.html';
+
+}
+
+
+//------------------------amdin Powers ------------------------------------
+document.querySelector('.addUserBtn').addEventListener('click', findUser)
+
+let isAdmin = false;
+function adminPowers(res){
+    document.querySelector('.grpName').textContent = localStorage.getItem('groupName')
+    document.querySelector('.grpMembers').innerHTML = `Group Members:`
+    document.querySelector('.groupAdmins').innerHTML = `Group Admins:`
+    const you = res.data.you;
+  
+    res.data.users.forEach(member => {
+        member.members.forEach(admin => {
+            if (admin.admin && member.id === you) {
+                isAdmin = true;
+            }
+        });})
+        //console.log(you)
+        res.data.users.forEach(member =>{
+           // console.log(member)
+           
+            member.members.forEach(admin =>{
+               // console.log(admin)
+                if(admin.admin){
+                    const span = document.createElement('div')  
+                    span.textContent =  `${member.name} `
+                    
+                    span.classList.add('grpMember')
+                    document.querySelector('.groupAdmins').appendChild(span)
+                }
+            })
+            const adminPowers = document.createElement('button')  
+            adminPowers.textContent =  `${member.name} `
+            adminPowers.classList.add(`${member.id}`)
+            adminPowers.classList.add('grpMember')
+            
+    
+            document.querySelector('.grpMembers').appendChild(adminPowers)
+    
+            adminPowers.addEventListener('click', async (e) => {
+                try {
+                    const id = adminPowers.getAttribute('class')[0]
+    
+                   console.log(id)
+                    if (isAdmin) {
+                        const result = await Swal.fire({
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Create Admin',
+                            cancelButtonText: 'Remove',
+                        });
+                        const groupId = localStorage.getItem('groupId')
+                        if (result.isConfirmed) {
+                         
+                          console.log(groupId)
+                            const res = await axios.post(`${membersUrl}/makeAdmin`, {id, groupId}, {
+                                headers: {
+                                    auth: token
+                                }
+                            });
+                           alert(res.data.message)
+                           e.target.style.color = "green"
+    
+                        } else if (result.dismiss === Swal.DismissReason.cancel){
+                           const res = await axios.post(`${membersUrl}/removeMember`,{id, groupId}, {
+                            headers: {
+                                auth: token
+                            }} )
+                            alert(res.data.message)
+                            e.target.style.color = "red"
+                        }
+                    }
+                } catch (error) {
+                    console.error('An error occurred:', error);
+                }
+            });
+    
+        })  
+   } 
+  
+async function findUser(e){
+   
+    const groupId = localStorage.getItem('groupId')
+    console.log(groupId)
+    const toShow = document.querySelector('.userToBeAdded')
+    toShow.textContent = ""
+    const users = await axios.get(`${membersUrl}/notMembers/${groupId}`,{
+        headers: {
+            auth: token
+        }
+    })
+console.log(users)
+
+   selection(users, toShow)
+ const submitBtn = document.createElement('button')
+ submitBtn.textContent= 'submit'
+ submitBtn.addEventListener('click', addUser)
+ toShow.appendChild(submitBtn)
+ 
+}
+ async function addUser(){
+    const groupId = localStorage.getItem('groupId')
+    console.log(isAdmin)
+    if(isAdmin){
+    console.log(membersToBeAdded)
+    const res = await axios.post(`${membersUrl}/addToGroup/${groupId}`, {membersToBeAdded}, {
+        headers:{
+            auth: token
+        }
+    })
+    if(res.status === 200){
+        alert('user added')
+    }
+}
+   else{
+    alert('you are not an admin')
+   }
+ }

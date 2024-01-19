@@ -37,43 +37,37 @@
             <div class="availableGrps"></div>
           </div>
 
-          <div class="col" id="chat">
+<div class="col" id="chat">
                  
     <div class="nameContainer">
       <button class="grpName"></button>
-
-      <div class="grid text-center">
-        <div class="row">
+        <div class="grid text-center">
+         <div class="row">
           <div class="col-6">
             <div class="grpMembers" style="display: none;"> Group Members: </div>
           </div>
           <div class="col-6">
             <div class="groupAdmins" style="display: none;"> Group Admins:</div>
           </div>
-          
         </div>
-        
+        <div class="addUser" style="display: none;">
+          <button class="addUserBtn" >Add User</button>
+          <div class="userToBeAdded"></div>
+        </div>
+       
       </div>
-      
     </div>
     <div class="container">
-       
-        <div class="joinedUsers">
-    
-        </div>
-        <div class="messages">
-            
-        </div>
-        
+      <div class="joinedUsers"></div>
+        <div class="messages"></div>
           <div class="sendMessage">
               <form id="messageForm" class="row">
                   <input type="text" class="col" placeholder="Type a message" id="message">
                   <input type="submit" class="col-2 " value="send"  id="send">
               </form>
           </div>
-        
     </div>
-          </div>
+</div>
           <div class="col-2" id="CreateGrp">
             <div class="group">
                 <button class="groupBtn">Create Group</button>
