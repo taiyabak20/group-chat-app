@@ -25,13 +25,9 @@ catch(err){
 
 exports.getMessages =async (req,res)=>{
     try{
-        const id = req.params.id;
-        const groupId = req.body.groupId;
-        //console.log(groupId)
+        const groupId = req.params.groupId;
         const data = await messages.findAll({where:{
-            id: {
-                [Op.gt]:id,
-            },
+           
              groupId: groupId,
         }, attributes : ['message'],
     include: [

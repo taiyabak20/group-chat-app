@@ -7,13 +7,15 @@ async function loginUser(e){
     const data = {
         email: e.target.email.value,
         password: e.target.password.value,
+        name: e.target.name.value,
     }
     try{
         const res = await axios.post(`${url}/loginUser`, data)
         if(res.status == 200){
             //console.log(res)
+            localStorage.setItem('userName',  e.target.name.value)
             localStorage.setItem('authToken', res.data)
-            console.log('login Sucessful')
+            //console.log('login Sucessful')
             window.location = '../chatApp/index.html'
         }
     }

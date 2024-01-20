@@ -20,6 +20,7 @@ async function createUser(e){
             e.target.email.value = ""
             e.target.pnumber.value = ""
             e.target.password.value = ""
+            window.location = '../login/login.html'
         }
     }
    catch(err){

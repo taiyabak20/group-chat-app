@@ -60,7 +60,7 @@ exports.groupMembers= async(req, res)=>{
     const groupId = req.params.groupId
 console.log(groupId)
     try {
-        const you = req.user.id
+        const you = req.user.name
         //console.log(req.user)
         const users = await user.findAll({
            

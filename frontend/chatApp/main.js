@@ -2,6 +2,21 @@ const url = `http://localhost:3000/user`
 const msgUrl = `http://localhost:3000/message`
 const groupUrl = `http://localhost:3000/group`
 const membersUrl = `http://localhost:3000/member`
+import { io } from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
+
+const socket = io( 'http://127.0.0.1:3000', {
+  auth: {
+    token: localStorage.getItem('authToken')
+  }
+});
+
+socket.on('connect', () => {
+  //console.log('Connected to server');
+  socket.on('message', (data) => {
+    showUpdatedMessages(data)
+});
+});
+
 
 window.addEventListener('DOMContentLoaded', rendering)
 document.querySelector('#messageForm').addEventListener('submit', sendMessage)
@@ -10,45 +25,48 @@ document.querySelector('.grpName').addEventListener('click', showGrpMembers)
 document.querySelector('.groupBtn').addEventListener('click', openForm)
 
 const token = localStorage.getItem('authToken')
+const gId = localStorage.getItem('groupId')
 
 async function rendering(){
     try{
         if(!token){
             window.location = '../login/login.html'
         }
+        if(gId){
+            document.querySelector('.grpName').style.display = "block"
+         }
      fetchData()
-       setInterval(async () => {
-        await fetchData(token);
-
-    }, 1000); 
-    fetchGrps()
+     fetchGrps()
+     
     }
     catch(err){
         console.log(err)
     }
 }
+let userName;
 
-let  id;
-async function fetchData(name){
+async function fetchData(){
+    const groupId = localStorage.getItem('groupId')
     document.querySelector('.messages').textContent = ""
     document.querySelector('.joinedUsers').textContent = ""
     
-   const groupId = localStorage.getItem('groupId')
-   //console.log(groupId)
+
     const res = await axios.get(`${url}/getAllUsers/${groupId}`, {
         headers: {
             auth : token
         }
     })
    
-    const messages= await axios.post(`${msgUrl}/getMessages/${id}`,{groupId}, {
+    const messages= await axios.get(`${msgUrl}/getMessages/${groupId}`, {
         headers : {
             auth: token
         }
     })
+    //console.log(messages)
     showOutput(res)
     adminPowers(res)
     showMessages(messages.data)
+    userName = (res.data.you)
 }
 function showOutput(res){
     
@@ -61,26 +79,39 @@ function showOutput(res){
     })
     
 }
-
-async function sendMessage(e){
-    e.preventDefault();
-    const message = e.target.message.value;
-try{
-    const groupId = localStorage.getItem('groupId')
-    //console.log(groupId)
-    const res = await axios.post(`${msgUrl}/sendMessage/${groupId}`, {message : message}, {
-        headers:{
-            auth: token
-        }
-    })
-    if(res.status == 200){
-        e.target.message.value=""
-    }
+function scrollToBottom() {
+    const element = document.querySelector('#chat')
+    element.scrollTop = element.scrollHeight
 }
-   catch(err){
-    console.log(err)
-   }
-    
+
+async function sendMessage(e) {
+  e.preventDefault()
+  const input  = e.target.message;
+  const message = input.value;
+  socket.emit('message', message);
+  try{
+        const groupId = localStorage.getItem('groupId')
+        const res = await axios.post(`${msgUrl}/sendMessage/${groupId}`, {message : message}, {
+            headers:{
+                auth: token
+            }
+        })
+        if(res.status == 200){
+            input.value = '';
+            
+        }
+    }
+       catch(err){
+        console.log(err)
+       }
+}
+
+function showUpdatedMessages(data){
+    const p = document.createElement('p')
+    p.textContent = `${userName}: ${data}`;
+    document.querySelector('.messages').appendChild(p)
+    scrollToBottom()
+   
 }
 
 function showMessages(res){
@@ -90,25 +121,19 @@ function showMessages(res){
             const p = document.createElement('p')
             p.textContent = `${entry.user.name}: ${entry.message}`;
             document.querySelector('.messages').appendChild(p)
+            scrollToBottom()
         }
         )
+        
 }
 
 
 
 // -----------------------Group Section----------------------------
 
-document.querySelector('.selectBtn').addEventListener('click', (e) => {
-    getMembers(e);
-});
-
-document.querySelector('.submitGrp').addEventListener('click', (e) => {
-    createGroup(e);
-});
-
-document.querySelector('.joinGrpBtn').addEventListener('click', (e) => {
-    joinGrp(e);
-});
+document.querySelector('.selectBtn').addEventListener('click', getMembers)
+document.querySelector('.submitGrp').addEventListener('click', createGroup);
+document.querySelector('.joinGrpBtn').addEventListener('click', joinGrp);
 
 let membersToBeAdded = []
 async function getMembers(e){
@@ -169,7 +194,7 @@ async function createGroup(e){
         auth: token
     }
    })
-   console.log(result.data)
+   //console.log(result.data)
    const availableGrps = document.querySelector('.availableGrps')
    const groupDiv = document.createElement('button')
    groupDiv.textContent = result.data.newGroup.name
@@ -190,9 +215,10 @@ async function fetchGrps(){
         
         document.querySelector('.availableGrps').appendChild(groups)
          groups.addEventListener('click', (e)=>{
-            e.preventDefault(e)
+            e.preventDefault()
             localStorage.setItem('groupId', entry.groupId)
             document.querySelector('.messages').textContent = ''
+            document.querySelector('.grpName').style.display = 'block'
             localStorage.setItem('groupName' , entry.group.name)
             fetchData()
            // console.log(entry)
@@ -238,13 +264,13 @@ async function joinGrp(e){
                 joinBtn.addEventListener('click',async (e) => {
             e.preventDefault();
             const value = joinBtn.getAttribute('class');
-            console.log(value)
+            //console.log(value)
             const res = await axios.post(`${membersUrl}/joinGrp`,{value},{
                 headers:{
                     auth: token
                 }
             })
-            console.log(res)
+            //console.log(res)
            alert(res.data)
         });
 
@@ -280,6 +306,7 @@ function showGrpMembers(){
 function logout(){
     localStorage.removeItem('authToken')
     localStorage.removeItem('groupId')
+    localStorage.clear()
     window.location.href = '../login/login.html';
 
 }
@@ -288,25 +315,28 @@ function logout(){
 //------------------------amdin Powers ------------------------------------
 document.querySelector('.addUserBtn').addEventListener('click', findUser)
 
-let isAdmin = false;
+let isAdmin;
 function adminPowers(res){
     document.querySelector('.grpName').textContent = localStorage.getItem('groupName')
     document.querySelector('.grpMembers').innerHTML = `Group Members:`
     document.querySelector('.groupAdmins').innerHTML = `Group Admins:`
     const you = res.data.you;
-  
     res.data.users.forEach(member => {
         member.members.forEach(admin => {
+            localStorage.setItem('isAdmin', admin.admin)
+
             if (admin.admin && member.id === you) {
                 isAdmin = true;
+                localStorage.setItem('isAdmin', isAdmin)
+                
             }
         });})
         //console.log(you)
         res.data.users.forEach(member =>{
-           // console.log(member)
+           // console.log(member.members)
            
             member.members.forEach(admin =>{
-               // console.log(admin)
+               
                 if(admin.admin){
                     const span = document.createElement('div')  
                     span.textContent =  `${member.name} `
@@ -327,7 +357,10 @@ function adminPowers(res){
                 try {
                     const id = adminPowers.getAttribute('class')[0]
     
-                   console.log(id)
+                   //console.log(id)
+                   const isAdmin = localStorage.getItem('isAdmin')
+                    //console.log(isAdmin)
+
                     if (isAdmin) {
                         const result = await Swal.fire({
                             icon: 'warning',
@@ -338,7 +371,7 @@ function adminPowers(res){
                         const groupId = localStorage.getItem('groupId')
                         if (result.isConfirmed) {
                          
-                          console.log(groupId)
+                          //console.log(groupId)
                             const res = await axios.post(`${membersUrl}/makeAdmin`, {id, groupId}, {
                                 headers: {
                                     auth: token
@@ -375,7 +408,7 @@ async function findUser(e){
             auth: token
         }
     })
-console.log(users)
+//console.log(users)
 
    selection(users, toShow)
  const submitBtn = document.createElement('button')
@@ -386,9 +419,9 @@ console.log(users)
 }
  async function addUser(){
     const groupId = localStorage.getItem('groupId')
-    console.log(isAdmin)
+    //console.log(isAdmin)
     if(isAdmin){
-    console.log(membersToBeAdded)
+    //console.log(membersToBeAdded)
     const res = await axios.post(`${membersUrl}/addToGroup/${groupId}`, {membersToBeAdded}, {
         headers:{
             auth: token
