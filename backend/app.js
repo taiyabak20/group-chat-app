@@ -69,7 +69,25 @@ sequelize
 .sync()
 .then(()=>{
     const connection = (socket)=>{
-        console.log(socket.id)  
+
+      socket.on('set custom id', (customId) => {
+        console.log(`User connected with custom ID: ${customId}`);
+        socket.customId = customId;
+        io.emit('user connected', customId);
+    });
+
+
+    socket.on('chat-message', (msg) => {
+      io.emit('chat-message', { customId: socket.customId, msg });
+  });
+
+
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
+      io.emit('user disconnected');
+  });
+     
     }
     io.on('connection' , connection)
     httpServer.listen(3000)

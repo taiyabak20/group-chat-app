@@ -10,10 +10,14 @@ const socket = io( 'http://127.0.0.1:3000', {
   }
 });
 
+const userId = (localStorage.getItem('userName'))
+socket.emit('set custom id', userId);
+
 socket.on('connect', () => {
-  //console.log('Connected to server');
-  socket.on('message', (data) => {
-    showUpdatedMessages(data)
+   
+  socket.on('chat-message', (data) => {
+     showUpdatedMessages(data)
+    
 });
 });
 
@@ -88,7 +92,7 @@ async function sendMessage(e) {
   e.preventDefault()
   const input  = e.target.message;
   const message = input.value;
-  socket.emit('message', message);
+  socket.emit('chat-message', message);
   try{
         const groupId = localStorage.getItem('groupId')
         const res = await axios.post(`${msgUrl}/sendMessage/${groupId}`, {message : message}, {
@@ -107,8 +111,9 @@ async function sendMessage(e) {
 }
 
 function showUpdatedMessages(data){
+    console.log(data)
     const p = document.createElement('p')
-    p.textContent = `${userName}: ${data}`;
+    p.textContent = `${data.customId}: ${data.msg}`;
     document.querySelector('.messages').appendChild(p)
     scrollToBottom()
    
@@ -359,7 +364,7 @@ function adminPowers(res){
     
                    //console.log(id)
                    const isAdmin = localStorage.getItem('isAdmin')
-                    //console.log(isAdmin)
+                    console.log(isAdmin)
 
                     if (isAdmin) {
                         const result = await Swal.fire({
@@ -419,7 +424,8 @@ async function findUser(e){
 }
  async function addUser(){
     const groupId = localStorage.getItem('groupId')
-    //console.log(isAdmin)
+    const isAdmin = localStorage.getItem('isAdmin')
+    console.log(isAdmin)
     if(isAdmin){
     //console.log(membersToBeAdded)
     const res = await axios.post(`${membersUrl}/addToGroup/${groupId}`, {membersToBeAdded}, {
