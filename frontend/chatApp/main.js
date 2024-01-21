@@ -93,6 +93,7 @@ async function sendMessage(e) {
   const input  = e.target.message;
   const message = input.value;
   socket.emit('chat-message', message);
+  console.log(message)
   try{
         const groupId = localStorage.getItem('groupId')
         const res = await axios.post(`${msgUrl}/sendMessage/${groupId}`, {message : message}, {
@@ -440,4 +441,28 @@ async function findUser(e){
    else{
     alert('you are not an admin')
    }
+ }
+
+
+ //----------------------multimedia-------------------------
+
+ document.querySelector('#multimedia').addEventListener('submit', uploadFiles)
+
+async function uploadFiles(e){
+    e.preventDefault();
+    const groupId = localStorage.getItem('groupId');
+    const fileInput = document.querySelector('#file');  
+    console.log(fileInput);
+    const file = fileInput.files[0];
+    console.log(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await axios.post(`${msgUrl}/uploadFile/${groupId}`, {formData}, {
+        headers:{
+            auth: token
+        }
+    })
+console.log(res);
  }
