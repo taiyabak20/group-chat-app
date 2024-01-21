@@ -69,7 +69,7 @@ async function fetchData(){
     //console.log(messages)
     showOutput(res)
     adminPowers(res)
-    showMessages(messages.data)
+    showMessages(messages.data, 'messages')
     userName = (res.data.you)
 }
 function showOutput(res){
@@ -120,7 +120,7 @@ function showUpdatedMessages(data){
    
 }
 
-function showMessages(res){
+function showMessages(res, area){
     
     res.forEach(entry =>
         {
@@ -128,13 +128,13 @@ function showMessages(res){
             if(entry.type == 'text'){
             const p = document.createElement('p')
             p.textContent = `${entry.user.name}: ${entry.message}`;
-            document.querySelector('.messages').appendChild(p)
+            document.querySelector(`.${area}`).appendChild(p)
         }
             else if(entry.type.startsWith('image')){
                 // console.log(res)
                 const img = document.createElement('img');
                 img.src = entry.message;
-                document.querySelector('.messages').appendChild(img);
+                document.querySelector(`.${area}`).appendChild(img);
         }
             else if(data.type.startsWith('video')){
                 const video = document.createElement('video')
@@ -142,7 +142,7 @@ function showMessages(res){
                 source.src = data.message
                 video.appendChild(source)
                 video.controls = true
-                document.querySelector('.messages').appendChild(video);
+                document.querySelector(`.${area}`).appendChild(video);
             }
             scrollToBottom()
         }
@@ -502,4 +502,18 @@ async function uploadFiles(e){
     document.getElementById('file').value = ''
     scrollToBottom()
 
+ }
+
+ document.querySelector('.archieved').addEventListener('click', loadOldChats)
+
+ async function loadOldChats(){
+    const groupId = localStorage.getItem('groupId')
+    const res = await axios.get(`${msgUrl}/oldChats/${groupId}`, {
+        headers: {
+            auth : token
+        }
+    })
+    document.querySelector('.oldChats').textContent = ""
+    showMessages(res.data, 'oldChats')
+    console.log(res)
  }

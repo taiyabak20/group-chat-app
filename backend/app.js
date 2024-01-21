@@ -1,10 +1,6 @@
 const express = require('express')
 const app = express()
 
-// const http = require('http');
-// const socketIo = require('socket.io');
-// const server = http.createServer(app);
-// const io = socketIo(server);
 const path = require('path');
 const parentDirectory = path.join(__dirname, '..','frontend');
 app.use(express.static(parentDirectory));
@@ -16,22 +12,6 @@ const io = require('socket.io')(httpServer, {
     cors: ['http://localhost:5500']
 });
 
-
-
-io.on('connection', (socket) => {
-    console.log('User connected');
-  
-    socket.on('message', (data) => {
-     
-      io.emit('message', data);
-    });
-  
-    socket.on('disconnect', () => {
-      console.log('User disconnected');
-    });
-  });
-  
-
 const bodyParser = require('body-parser');
 const sequelize = require('./utils/db')
 const userRoutes = require('./routes/users')
@@ -42,7 +22,11 @@ const User = require('./models/users')
 const Message = require('./models/messages')
 const Group = require('./models/group')
 const Member = require('./models/members')
+const ArchivedChat = require('./models/ArchivedChat')
+const cronJob = require('./utils/cron')
 const cors = require('cors')
+cronJob.start()
+
 app.use(cors({
     origin: ['http://127.0.0.1:3000', 'http://127.0.0.1:5500'],
     methods: ['GET', 'POST'],
@@ -56,6 +40,8 @@ app.use('/group', groupRoutes)
 app.use('/member' , memberRoutes)
 User.hasMany(Message)
 Message.belongsTo(User)
+User.hasMany(ArchivedChat)
+ArchivedChat.belongsTo(User)
 User.belongsToMany(Group , {through : Member})
 Group.belongsToMany( User, {through : Member})
 Group.hasMany(Message)

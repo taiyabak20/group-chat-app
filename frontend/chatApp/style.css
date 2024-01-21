@@ -81,19 +81,22 @@ body {
     padding: 2px;
    
 }
+#Members{
+  display: flex;
+  align-items: baseline;
+}
+
+.row{
+  align-items: end;
+  }
 
 .user-container {
     display: flex;
     align-items: end;
     margin-bottom: 10px;
     font-size: 15px;
-    
-
 }
 
-.row{
-align-items: end;
-}
 .user-container p {
     margin-right: 15px;
   

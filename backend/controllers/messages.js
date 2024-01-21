@@ -3,7 +3,7 @@ const users = require('../models/users');
 const Group = require('../models/group')
 const {Op}= require('sequelize')
 const {uploadToS3} = require('../services/s3services')
-
+const archivedChats = require('../models/ArchivedChat')
 exports.addMessage =async (req, res)=>{
     try
     {
@@ -69,4 +69,26 @@ catch(err){
     return res.status(500).json({ success: false, msg: "Internal server error" })
 }
 
+}
+
+exports.oldChats = async(req, res)=>{
+    
+    try{
+        const groupId = req.params.groupId;
+        const data = await archivedChats.findAll({where:{
+           
+             groupId: groupId,
+        }, attributes : ['message', 'type'],
+    include: [
+        {
+            model: users,
+            attributes: ['name'],
+        }
+    ]})
+        //console.log(data)
+        return res.json(data)
+    }
+    catch(err){
+        console.log(err)
+    }
 }
