@@ -7,14 +7,14 @@ exports.addMessage =async (req, res)=>{
     {
     const groupId = req.params.groupId
     const messageText = req.body.message;
-    console.log(messageText)
     const group = await Group.findByPk(groupId);
+    console.log(group)
 
     if (!group) {
         return res.status(404).json({ success: false, error: 'Group not found' });
     }
 
-    const message = await group.createMessage({ message: messageText, userId: req.user.id });
+   const message = await group.createMessage({ message: messageText, userId: req.user.id });
 
     return res.json({ success: true, message });
 }
@@ -42,4 +42,9 @@ exports.getMessages =async (req,res)=>{
     catch(err){
         console.log(err)
     }
+}
+
+exports.uploadaFile =async (req, res)=>{
+//    const file = req
+//     console.log(file)
 }
