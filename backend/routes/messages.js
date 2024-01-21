@@ -6,6 +6,6 @@ const upload = require('../utils/multer')
 
 router.post('/sendMessage/:groupId',auth , messageControllers.addMessage)
 router.get('/getMessages/:groupId',auth , messageControllers.getMessages)
-router.post('/uploadFile/:groupId',auth ,upload.single('file'), messageControllers.uploadaFile)
+router.post('/uploadFile/:groupId',auth ,upload.single('file'), messageControllers.uploadFile)
 
 module.exports = router;

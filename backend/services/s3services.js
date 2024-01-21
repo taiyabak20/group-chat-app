@@ -1,7 +1,7 @@
 require('dotenv').config()
 const AWS = require('aws-sdk')
 
-exports.uploadToS3 = (data, filename) => {
+exports.uploadToS3 =async (data, filename) => {
     const BUCKET_NAME = process.env.BUCKET_NAME;
     const IAM_USER_KEY = process.env.IAM_USER_KEY;
     const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
@@ -24,7 +24,7 @@ exports.uploadToS3 = (data, filename) => {
                     reject(err)
                 }
                 else{
-                    console.log('success' , s3response)
+                    console.log(s3response)
                     resolve(s3response.Location);
                 }
             })

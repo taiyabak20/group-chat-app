@@ -124,9 +124,26 @@ function showMessages(res){
     
     res.forEach(entry =>
         {
+            //console.log(entry.type)
+            if(entry.type == 'text'){
             const p = document.createElement('p')
             p.textContent = `${entry.user.name}: ${entry.message}`;
             document.querySelector('.messages').appendChild(p)
+        }
+            else if(entry.type.startsWith('image')){
+                // console.log(res)
+                const img = document.createElement('img');
+                img.src = entry.message;
+                document.querySelector('.messages').appendChild(img);
+        }
+            else if(data.type.startsWith('video')){
+                const video = document.createElement('video')
+                const source = document.createElement('source')
+                source.src = data.message
+                video.appendChild(source)
+                video.controls = true
+                document.querySelector('.messages').appendChild(video);
+            }
             scrollToBottom()
         }
         )
@@ -452,17 +469,37 @@ async function uploadFiles(e){
     e.preventDefault();
     const groupId = localStorage.getItem('groupId');
     const fileInput = document.querySelector('#file');  
-    console.log(fileInput);
+    //console.log(fileInput);
     const file = fileInput.files[0];
     console.log(file);
 
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await axios.post(`${msgUrl}/uploadFile/${groupId}`, {formData}, {
+    const res = await axios.post(`${msgUrl}/uploadFile/${groupId}`, formData, {
         headers:{
             auth: token
         }
     })
-console.log(res);
+   
+    const data = res.data;
+    const div = document.createElement('div')
+    socket.emit('file:send-file-data', data, groupId)
+    if (data.type.startsWith('image')) {
+        const img = document.createElement('img')
+        img.src = data.message
+        div.appendChild(img)
+    } else if (data.type.startsWith('video')) {
+        const video = document.createElement('video')
+        const source = document.createElement('source')
+        source.src = data.message
+        video.appendChild(source)
+        video.controls = true
+        div.appendChild(video)
+    }
+    document.querySelector('.messages').appendChild(div)
+    
+    document.getElementById('file').value = ''
+    scrollToBottom()
+
  }
